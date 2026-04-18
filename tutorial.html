@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Tutorial: come si svolge la scheda — esempi passo-passo</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #0a1128;
+    --blu: #1a4d80;
+    --blu-dark: #0e2d4d;
+    --rosso: #d62828;
+    --rosso-dark: #9d0208;
+    --giallo: #f77f00;
+    --verde: #2a9d8f;
+    --grigio-text: #1a1a1a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    font-size: 18px;
+  }
+  .slide {
+    min-height: 100vh;
+    padding: 3vh 5vw;
+    display: none;
+    flex-direction: column;
+    justify-content: flex-start;
+    page-break-after: always;
+    border-bottom: 4px solid var(--blu);
+  }
+  .slide.active { display: flex; }
+  h1 {
+    font-size: clamp(2.4rem, 4.8vw, 3.8rem);
+    margin-bottom: 0.4em;
+    border-bottom: 5px solid var(--blu);
+    padding-bottom: 0.25em;
+    font-weight: 900;
+    color: var(--blu-dark);
+    line-height: 1.15;
+  }
+  h2 {
+    font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+    margin-bottom: 0.6em;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  h3 {
+    font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+    margin: 0.6em 0 0.3em;
+    font-weight: 800;
+    color: var(--blu-dark);
+  }
+  p { margin-bottom: 0.6em; font-size: clamp(1.05rem, 1.75vw, 1.4rem); }
+  .sub {
+    font-size: clamp(1.1rem, 1.9vw, 1.5rem);
+    color: var(--grigio-text);
+    margin-top: 0.3em;
+    font-weight: 500;
+  }
+  .source {
+    position: fixed;
+    bottom: 1vh;
+    right: 2vw;
+    font-size: clamp(0.85rem, 1vw, 1rem);
+    color: var(--grigio-text);
+    background: #fff;
+    padding: 0.4em 0.8em;
+    border: 1px solid var(--blu);
+    font-weight: 600;
+  }
+  .nav {
+    position: fixed;
+    bottom: 1vh;
+    left: 2vw;
+    background: #fff;
+    padding: 0.3em 0.7em;
+    border: 2px solid var(--blu);
+    display: flex;
+    gap: 0.6em;
+    align-items: center;
+  }
+  .nav button {
+    background: var(--blu);
+    color: #fff;
+    border: none;
+    padding: 0.3em 0.9em;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1.05rem;
+    border-radius: 3px;
+  }
+  .nav button:hover { background: var(--rosso); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .counter { font-size: 0.9rem; font-weight: 800; color: var(--blu-dark); }
+  .hint {
+    position: fixed;
+    top: 1vh;
+    right: 2vw;
+    font-size: 0.85rem;
+    color: var(--grigio-text);
+    font-style: italic;
+  }
+  .concept-card {
+    border: 3px solid var(--blu);
+    background: #fff;
+    padding: 1.2em 1.5em;
+    margin: 0.8em 0;
+    box-shadow: 5px 5px 0 var(--blu-dark);
+  }
+  .concept-card h3 { margin-top: 0; }
+  .concept-card .def {
+    font-size: clamp(1.1rem, 1.8vw, 1.45rem);
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .concept-card .def b { color: var(--blu-dark); }
+  .example-box {
+    border: 3px solid var(--rosso);
+    background: #fff7f5;
+    padding: 1.2em 1.5em;
+    margin: 1em 0;
+    box-shadow: 5px 5px 0 var(--rosso-dark);
+  }
+  .example-box h3 {
+    color: var(--rosso-dark);
+    font-size: clamp(1.4rem, 2.4vw, 2rem);
+  }
+  .step {
+    display: none;
+    padding: 0.8em 1em;
+    background: #fff;
+    border-left: 6px solid var(--blu);
+    margin: 0.7em 0;
+    font-size: clamp(1.1rem, 1.75vw, 1.4rem);
+    line-height: 1.5;
+  }
+  .step.visible { display: block; }
+  .step b { color: var(--blu-dark); }
+  .step-num {
+    display: inline-block;
+    background: var(--blu);
+    color: #fff;
+    font-weight: 900;
+    padding: 0.1em 0.6em;
+    border-radius: 3px;
+    margin-right: 0.5em;
+    font-size: 0.9em;
+  }
+  .step-btn {
+    display: inline-block;
+    background: var(--rosso);
+    color: #fff;
+    border: none;
+    padding: 0.6em 1.4em;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    margin-top: 0.8em;
+    border-radius: 4px;
+    box-shadow: 3px 3px 0 var(--rosso-dark);
+  }
+  .step-btn:hover { background: var(--rosso-dark); }
+  .step-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .formula {
+    display: inline-block;
+    background: #fff;
+    padding: 0.2em 0.5em;
+    border: 2.5px solid var(--blu);
+    font-weight: 800;
+    color: var(--blu-dark);
+    font-family: Georgia, "Times New Roman", serif;
+    border-radius: 3px;
+  }
+  .result {
+    display: inline-block;
+    background: var(--rosso);
+    color: #fff;
+    padding: 0.2em 0.6em;
+    font-weight: 900;
+    font-family: Georgia, serif;
+    border-radius: 3px;
+  }
+  table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+    background: #fff;
+  }
+  th, td {
+    border: 1.5px solid var(--blu);
+    padding: 0.55em 1em;
+    background: #fff;
+    text-align: center;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  th {
+    font-weight: 800;
+    color: var(--blu-dark);
+    border-bottom: 3px solid var(--blu);
+  }
+  .highlight { font-weight: 900; color: var(--rosso); }
+  .cell-reveal {
+    background: #fff7f5 !important;
+    font-weight: 800 !important;
+    color: var(--rosso-dark) !important;
+    animation: flashIn 0.5s ease-out;
+  }
+  .cell-moda {
+    background: var(--rosso) !important;
+    color: #fff !important;
+    font-weight: 900 !important;
+  }
+  @keyframes flashIn {
+    from { background: var(--giallo); transform: scale(1.05); }
+    to { background: #fff7f5; transform: scale(1); }
+  }
+  .chart-box {
+    max-width: 700px;
+    margin: 1em auto;
+    padding: 1em;
+    border: 2.5px solid var(--blu);
+    background: #fff;
+    border-radius: 6px;
+  }
+  .tool-list {
+    padding-left: 1.5em;
+    font-size: clamp(1.15rem, 1.9vw, 1.55rem);
+    line-height: 1.7;
+  }
+  .tool-list li { margin-bottom: 0.5em; }
+  .tool-list li b { color: var(--blu-dark); }
+
+  @media (max-width: 900px) {
+    .slide { padding: 2vh 4vw; }
+  }
+  @media print {
+    .nav, .hint, .step-btn { display: none; }
+    .slide { display: flex !important; min-height: auto; page-break-after: always; border-bottom: 2px solid #000; }
+    .step { display: block !important; border-left-color: #000 !important; }
+    .source { position: static; color: #000; border: 1px solid #000; }
+    h1 { color: #000; border-bottom-color: #000; }
+    h3 { color: #000; }
+    .concept-card { border-color: #000; box-shadow: none; }
+    .concept-card .def b { color: #000; }
+    .example-box { border-color: #000; box-shadow: none; background: #fff; }
+    .example-box h3 { color: #000; }
+    .formula { border-color: #000; color: #000; }
+    .result { background: #fff !important; color: #000 !important; border: 2.5px solid #000; }
+    th, td { border-color: #000; color: #000; }
+    th { color: #000; border-bottom-color: #000; }
+    .highlight { color: #000; }
+    .chart-box { border-color: #000; }
+    .tool-list li b { color: #000; }
+    .step b { color: #000; }
+    .step-num { background: #000 !important; }
+    .cell-reveal { background: #fff !important; color: #000 !important; border-color: #000 !important; }
+    .cell-moda { background: #fff !important; color: #000 !important; border: 3px solid #000 !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hint">← → per cambiare slide · clicca "Prossimo passo" per svelare i calcoli</div>
+
+<!-- SLIDE 1 -->
+<section class="slide active" id="s1">
+  <h1>Come si svolge la scheda</h1>
+  <h2>Un tutorial passo-passo con esempi diversi da quelli della scheda</h2>
+  <p class="sub" style="margin-top:1em;">In queste 9 slide vi mostriamo <b>come funzionano i concetti</b> che userete nella scheda: frequenza, percentuale, moda, rapporto, differenza in punti, variazione in percentuale, diagramma a barre, proporzione alla scuola.</p>
+  <p class="sub">Gli esempi usano <b>numeri diversi</b> da quelli della scheda: così capite il metodo senza avere già le risposte.</p>
+  <p class="sub">Nei box rossi cliccate il pulsante <b>"Prossimo passo"</b> per svelare un calcolo alla volta.</p>
+  <div class="source">Tutorial scheda dialogo ISTAT 2023</div>
+</section>
+
+<!-- SLIDE 2 -->
+<section class="slide" id="s2">
+  <h1>Gli strumenti che vi servono</h1>
+  <h2>Otto strumenti, tutti semplici se visti uno alla volta</h2>
+  <ul class="tool-list">
+    <li><b>Frequenza assoluta</b>: quante volte un caso si ripete (es. 60 persone).</li>
+    <li><b>Frequenza relativa</b>: la parte sul totale, scritta come decimale (0,50).</li>
+    <li><b>Percentuale</b>: la frequenza relativa moltiplicata per 100 (50%).</li>
+    <li><b>Moda</b>: il caso <em>più frequente</em> (il valore più alto).</li>
+    <li><b>Rapporto max/min</b>: quante volte il più grande è rispetto al più piccolo.</li>
+    <li><b>Differenza in punti</b>: la sottrazione fra due percentuali (23,7 − 19,8 = 3,9 punti).</li>
+    <li><b>Variazione in %</b>: di quanto cresce o cala rispetto al riferimento.</li>
+    <li><b>Diagramma a barre</b>: il disegno che rende i numeri visibili.</li>
+  </ul>
+  <p class="sub" style="margin-top:1em;">Nelle prossime slide li vediamo <b>uno per uno</b>, con lo stesso esempio che si sviluppa.</p>
+</section>
+
+<!-- SLIDE 3: Frequenza e percentuale + Moda -->
+<section class="slide" id="s3">
+  <h1>Frequenza, percentuale e moda</h1>
+
+  <div class="concept-card">
+    <h3>Il concetto</h3>
+    <p class="def"><b>Frequenza relativa</b> = casi osservati ÷ totale. <b>Percentuale</b> = frequenza relativa × 100. <b>Moda</b> = il caso che si ripete di più.</p>
+  </div>
+
+  <div class="example-box">
+    <h3>Esempio — che cosa hanno visto 120 ragazzi in chat</h3>
+    <p>In un'indagine scolastica, 120 ragazzi hanno segnalato cosa vedono più spesso nelle chat di classe.</p>
+    <table>
+      <tr><th>Cosa hanno visto</th><th>Casi</th><th>Freq. relativa</th><th>Percentuale</th></tr>
+      <tr><td>Battute pesanti</td><td>60</td><td id="c3a">?</td><td id="c3b">?</td></tr>
+      <tr><td>Esclusione dai gruppi</td><td>35</td><td id="c3c">?</td><td id="c3d">?</td></tr>
+      <tr><td>Foto senza permesso</td><td>15</td><td id="c3e">?</td><td id="c3f">?</td></tr>
+      <tr><td>Minacce esplicite</td><td>10</td><td id="c3g">?</td><td id="c3h">?</td></tr>
+      <tr><th>Totale</th><th>120</th><th>1,00</th><th>100%</th></tr>
+    </table>
+
+    <div class="step" data-slide="3" data-step="1">
+      <span class="step-num">1</span><b>Frequenza relativa battute pesanti</b>: <span class="formula">60 ÷ 120 = 0,50</span>
+    </div>
+    <div class="step" data-slide="3" data-step="2">
+      <span class="step-num">2</span><b>Percentuale</b>: <span class="formula">0,50 × 100 = 50%</span>
+    </div>
+    <div class="step" data-slide="3" data-step="3">
+      <span class="step-num">3</span>Facciamo lo stesso per le altre: esclusione <span class="formula">35/120 ≈ 0,292 → 29,2%</span>, foto <span class="formula">15/120 = 0,125 → 12,5%</span>, minacce <span class="formula">10/120 ≈ 0,083 → 8,3%</span>.
+    </div>
+    <div class="step" data-slide="3" data-step="4">
+      <span class="step-num">4</span><b>Moda</b> = il caso più frequente = <span class="result">Battute pesanti (50%)</span>
+    </div>
+
+    <button class="step-btn" onclick="nextStep(3)">Prossimo passo</button>
+  </div>
+</section>
+
+<!-- SLIDE 4: Rapporto max/min -->
+<section class="slide" id="s4">
+  <h1>Rapporto max / min</h1>
+
+  <div class="concept-card">
+    <h3>Il concetto</h3>
+    <p class="def">Il <b>rapporto max/min</b> dice <em>quante volte</em> il caso più frequente è rispetto al meno frequente. Si fa con una divisione.</p>
+  </div>
+
+  <div class="example-box">
+    <h3>Esempio — quante volte di più?</h3>
+    <p>Restiamo sull'indagine delle 120 persone. <b>Battute pesanti = 60</b>, <b>Minacce esplicite = 10</b>. Quante volte le battute sono più frequenti delle minacce?</p>
+
+    <div class="step" data-slide="4" data-step="1">
+      <span class="step-num">1</span>Cerchiamo il <b>caso più frequente</b>: battute pesanti (60 casi).
+    </div>
+    <div class="step" data-slide="4" data-step="2">
+      <span class="step-num">2</span>Cerchiamo il <b>caso meno frequente</b>: minacce esplicite (10 casi).
+    </div>
+    <div class="step" data-slide="4" data-step="3">
+      <span class="step-num">3</span><b>Rapporto</b>: <span class="formula">60 ÷ 10 = 6</span>
+    </div>
+    <div class="step" data-slide="4" data-step="4">
+      <span class="step-num">4</span>Lo leggiamo così: <span class="result">le battute pesanti sono 6 volte più frequenti delle minacce</span>.
+    </div>
+    <div class="step" data-slide="4" data-step="5">
+      <span class="step-num">5</span>Funziona anche con le percentuali: <span class="formula">50 ÷ 8,3 ≈ 6</span>. Stesso risultato.
+    </div>
+
+    <button class="step-btn" onclick="nextStep(4)">Prossimo passo</button>
+  </div>
+</section>
+
+<!-- SLIDE 5: Differenza in punti vs Variazione % -->
+<section class="slide" id="s5">
+  <h1>Differenza in punti vs variazione in %</h1>
+  <h2>Attenzione: due cose diverse!</h2>
+
+  <div class="concept-card">
+    <h3>I due concetti</h3>
+    <p class="def"><b>Differenza in punti percentuali</b> = sottrazione fra due percentuali. Esempio: 23,7% − 19,8% = <b>3,9 punti</b>.</p>
+    <p class="def"><b>Variazione in percentuale</b> = di quanto il primo cresce rispetto al secondo. Si calcola dividendo la differenza per il <em>valore di riferimento</em>.</p>
+  </div>
+
+  <div class="example-box">
+    <h3>Esempio — bullismo ripetuto nei più giovani (dato ISTAT 2023)</h3>
+    <p>I ragazzi 11-13 anni subiscono atti di bullismo più volte al mese nel <b>23,7%</b> dei casi. I ragazzi 14-19 anni: <b>19,8%</b>. Quanto è grande la differenza?</p>
+
+    <div class="step" data-slide="5" data-step="1">
+      <span class="step-num">1</span><b>Differenza in punti</b>: <span class="formula">23,7 − 19,8 = 3,9 punti</span>
+    </div>
+    <div class="step" data-slide="5" data-step="2">
+      <span class="step-num">2</span>Leggiamo: i più giovani sono colpiti <span class="result">3,9 punti percentuali in più</span> dei più grandi.
+    </div>
+    <div class="step" data-slide="5" data-step="3">
+      <span class="step-num">3</span>Adesso la <b>variazione in %</b>: prendiamo 14-19 come <b>valore di riferimento</b> (19,8%).
+    </div>
+    <div class="step" data-slide="5" data-step="4">
+      <span class="step-num">4</span>Formula: <span class="formula">(23,7 − 19,8) ÷ 19,8 × 100</span>
+    </div>
+    <div class="step" data-slide="5" data-step="5">
+      <span class="step-num">5</span>Calcolo: <span class="formula">3,9 ÷ 19,8 × 100 ≈ 19,7%</span>
+    </div>
+    <div class="step" data-slide="5" data-step="6">
+      <span class="step-num">6</span>Leggiamo: i più giovani subiscono bullismo <span class="result">circa il 20% in più</span> rispetto ai più grandi.
+    </div>
+
+    <button class="step-btn" onclick="nextStep(5)">Prossimo passo</button>
+  </div>
+</section>
+
+<!-- SLIDE 6: Diagramma a barre -->
+<section class="slide" id="s6">
+  <h1>Il diagramma a barre</h1>
+  <h2>Rendere i numeri visibili</h2>
+
+  <div class="concept-card">
+    <h3>Il concetto</h3>
+    <p class="def">Un <b>diagramma a barre</b> si usa quando i dati sono <em>categorie</em> (tipi di bullismo, piattaforme): ogni categoria ha una barra di altezza uguale alla sua percentuale.</p>
+    <p class="def">Non va confuso con l'<b>istogramma</b>, che si usa solo per dati numerici ordinati (es. fasce d'età).</p>
+  </div>
+
+  <div class="example-box">
+    <h3>Esempio — le 4 categorie dalla slide 3</h3>
+    <p>Trasformiamo la tabella in un diagramma a barre. Ogni barra è alta quanto la percentuale del caso.</p>
+    <div class="chart-box"><canvas id="chart6" height="260"></canvas></div>
+    <div class="step" data-slide="6" data-step="1">
+      <span class="step-num">1</span>Sull'asse verticale: le <b>percentuali</b> (da 0 a 50).
+    </div>
+    <div class="step" data-slide="6" data-step="2">
+      <span class="step-num">2</span>Sull'asse orizzontale: le <b>categorie</b> (i 4 tipi).
+    </div>
+    <div class="step" data-slide="6" data-step="3">
+      <span class="step-num">3</span>Si vede subito che la <b>moda</b> è la barra più alta.
+    </div>
+
+    <button class="step-btn" onclick="nextStep(6)">Prossimo passo</button>
+  </div>
+</section>
+
+<!-- SLIDE 7: Proporzione scuola -->
+<section class="slide" id="s7">
+  <h1>"In una scuola di 500 studenti…"</h1>
+  <h2>Portare la percentuale nel mondo reale</h2>
+
+  <div class="concept-card">
+    <h3>Il concetto</h3>
+    <p class="def">Una percentuale da sola non fa vedere il peso reale. Se la moltiplichi per il numero di una scuola o un gruppo, <b>si capisce di quante persone stiamo parlando</b>.</p>
+  </div>
+
+  <div class="example-box">
+    <h3>Esempio — il 68,5% che ha subito almeno un episodio</h3>
+    <p>ISTAT 2023 dice che il 68,5% dei ragazzi 11-19 anni ha subito almeno un episodio di bullismo nei 12 mesi. Se nella nostra scuola ci sono <b>500 studenti</b>, quanti sarebbero?</p>
+
+    <div class="step" data-slide="7" data-step="1">
+      <span class="step-num">1</span>Trasformiamo la percentuale in decimale: <span class="formula">68,5% → 0,685</span>
+    </div>
+    <div class="step" data-slide="7" data-step="2">
+      <span class="step-num">2</span>Moltiplichiamo per il numero di studenti: <span class="formula">500 × 0,685 = 342,5</span>
+    </div>
+    <div class="step" data-slide="7" data-step="3">
+      <span class="step-num">3</span>Arrotondiamo all'intero più vicino: <span class="result">≈ 343 studenti</span>
+    </div>
+    <div class="step" data-slide="7" data-step="4">
+      <span class="step-num">4</span>Leggiamo: in una scuola come la nostra, <b>circa 343 ragazzi</b> avrebbero subito almeno un episodio di bullismo nell'ultimo anno.
+    </div>
+
+    <button class="step-btn" onclick="nextStep(7)">Prossimo passo</button>
+  </div>
+</section>
+
+<!-- SLIDE 8: Riepilogo formule -->
+<section class="slide" id="s8">
+  <h1>Riepilogo delle formule</h1>
+  <h2>Tutto quello che vi serve, in una tabella</h2>
+  <table>
+    <tr><th>Concetto</th><th>Come si calcola</th><th>Esempio dal tutorial</th></tr>
+    <tr>
+      <td>Frequenza relativa</td>
+      <td>casi ÷ totale</td>
+      <td>60 / 120 = 0,50</td>
+    </tr>
+    <tr>
+      <td>Percentuale</td>
+      <td>freq. relativa × 100</td>
+      <td>0,50 × 100 = 50%</td>
+    </tr>
+    <tr>
+      <td>Moda</td>
+      <td>il caso più frequente</td>
+      <td>Battute pesanti (50%)</td>
+    </tr>
+    <tr>
+      <td>Rapporto max/min</td>
+      <td>il più grande ÷ il più piccolo</td>
+      <td>60 / 10 = 6 volte</td>
+    </tr>
+    <tr>
+      <td>Differenza in punti</td>
+      <td>sottrazione fra due %</td>
+      <td>23,7 − 19,8 = 3,9 punti</td>
+    </tr>
+    <tr>
+      <td>Variazione in %</td>
+      <td>(differenza ÷ riferimento) × 100</td>
+      <td>3,9 / 19,8 × 100 ≈ 19,7%</td>
+    </tr>
+    <tr>
+      <td>Proporzione a una scuola</td>
+      <td>% × totale studenti</td>
+      <td>500 × 0,685 ≈ 343</td>
+    </tr>
+  </table>
+  <p class="sub" style="margin-top:0.8em;">Se una formula non ve la ricordate, tornate qui: la scheda che fate adesso usa solo queste sette.</p>
+</section>
+
+<!-- SLIDE 9 -->
+<section class="slide" id="s9">
+  <h1>Ora tocca a voi</h1>
+  <h2>Aprite la scheda e iniziate dal vostro esercizio</h2>
+  <p class="sub" style="margin-top:1em;">Nella scheda trovate <b>altri numeri</b>, ma i concetti sono gli stessi. Se vi blocca un passaggio, tornate su questa guida.</p>
+  <div class="concept-card">
+    <h3>Checklist prima di iniziare</h3>
+    <ul class="tool-list">
+      <li>Ho la mia scheda (A o B) con i calcoli da fare.</li>
+      <li>Ho a fianco il compagno o la compagna per il dialogo finale.</li>
+      <li>Se un numero non torna, ricontrollo la divisione o la sottrazione.</li>
+      <li>Se ho un dubbio di concetto, torno a questa guida.</li>
+    </ul>
+  </div>
+  <p class="sub" style="margin-top:0.8em;font-size:clamp(1.15rem, 2vw, 1.6rem);"><b>Buon lavoro.</b></p>
+  <div class="source">Fonte dati reali: ISTAT 2023 — Dati inventati per l'esempio chat</div>
+</section>
+
+<div class="nav">
+  <button id="prev">◀</button>
+  <span class="counter" id="counter">1 / 9</span>
+  <button id="next">▶</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let idx = 0;
+const counter = document.getElementById('counter');
+const prev = document.getElementById('prev');
+const next = document.getElementById('next');
+
+function show(i) {
+  slides[idx].classList.remove('active');
+  idx = Math.max(0, Math.min(slides.length - 1, i));
+  slides[idx].classList.add('active');
+  counter.textContent = (idx+1) + ' / ' + slides.length;
+  prev.disabled = (idx === 0);
+  next.disabled = (idx === slides.length - 1);
+  initChartFor(idx);
+}
+
+prev.onclick = () => show(idx - 1);
+next.onclick = () => show(idx + 1);
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'BUTTON') return;
+  if (e.key === 'ArrowRight') show(idx + 1);
+  if (e.key === 'ArrowLeft')  show(idx - 1);
+});
+
+/* Step reveal + tabella slide 3 che si compila */
+const stepState = {};
+function nextStep(slideNum) {
+  stepState[slideNum] = (stepState[slideNum] || 0) + 1;
+  const steps = document.querySelectorAll(`.step[data-slide="${slideNum}"]`);
+  let total = steps.length;
+  steps.forEach(s => {
+    if (parseInt(s.dataset.step) <= stepState[slideNum]) {
+      s.classList.add('visible');
+    }
+  });
+
+  // Popola progressivamente la tabella della slide 3
+  if (slideNum === 3) {
+    if (stepState[3] >= 1) {
+      document.getElementById('c3a').textContent = '0,50';
+      document.getElementById('c3a').classList.add('cell-reveal');
+    }
+    if (stepState[3] >= 2) {
+      document.getElementById('c3b').textContent = '50%';
+      document.getElementById('c3b').classList.add('cell-reveal');
+    }
+    if (stepState[3] >= 3) {
+      document.getElementById('c3c').textContent = '0,292';
+      document.getElementById('c3d').textContent = '29,2%';
+      document.getElementById('c3e').textContent = '0,125';
+      document.getElementById('c3f').textContent = '12,5%';
+      document.getElementById('c3g').textContent = '0,083';
+      document.getElementById('c3h').textContent = '8,3%';
+      ['c3c','c3d','c3e','c3f','c3g','c3h'].forEach(id =>
+        document.getElementById(id).classList.add('cell-reveal')
+      );
+    }
+    if (stepState[3] >= 4) {
+      // evidenzia riga moda
+      document.getElementById('c3b').classList.add('cell-moda');
+      document.getElementById('c3a').classList.add('cell-moda');
+    }
+  }
+
+  if (stepState[slideNum] >= total) {
+    const btns = document.querySelectorAll(`#s${slideNum} .step-btn`);
+    btns.forEach(b => {
+      b.disabled = true;
+      b.textContent = 'Tutti i passi svelati';
+    });
+  }
+}
+
+/* Chart for slide 6 */
+const palette = {
+  blu: '#1a4d80',
+  bluDark: '#0e2d4d',
+  rosso: '#d62828',
+  rossoDark: '#9d0208',
+  ink: '#0a1128'
+};
+
+const initialized = new Set();
+function initChartFor(slideIdx) {
+  if (initialized.has(slideIdx)) return;
+  initialized.add(slideIdx);
+  setTimeout(() => {
+    if (slideIdx === 5) makeChart6();
+  }, 50);
+}
+
+/* Plugin custom: valori sopra ogni barra (accessibilità daltonica + leggibilità LIM) */
+const valueLabelsPlugin = {
+  id: 'valueLabels',
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    chart.data.datasets.forEach((dataset, i) => {
+      const meta = chart.getDatasetMeta(i);
+      meta.data.forEach((bar, index) => {
+        const value = dataset.data[index];
+        ctx.fillStyle = palette.bluDark;
+        ctx.font = 'bold 16px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(value + '%', bar.x, bar.y - 6);
+      });
+    });
+  }
+};
+
+function makeChart6() {
+  new Chart(document.getElementById('chart6'), {
+    type: 'bar',
+    data: {
+      labels: ['Battute pesanti', 'Esclusione', 'Foto senza permesso', 'Minacce'],
+      datasets: [{
+        label: 'Percentuale (%)',
+        data: [50, 29.2, 12.5, 8.3],
+        backgroundColor: [palette.rosso, palette.blu, palette.blu, palette.blu],
+        borderColor: palette.ink,
+        borderWidth: 2.5,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 28 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: palette.bluDark,
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          titleFont: { weight: '800', size: 15 },
+          bodyFont: { size: 14 }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 60,
+          grid: { color: '#cfd8e3' },
+          ticks: {
+            color: palette.ink,
+            font: { weight: '700', size: 14 },
+            callback: v => v + '%'
+          }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: palette.ink, font: { weight: '700', size: 13 } }
+        }
+      }
+    },
+    plugins: [valueLabelsPlugin]
+  });
+}
+
+/* Completa tabella slide 3 per chi guarda senza cliccare */
+document.addEventListener('DOMContentLoaded', () => {
+  // Tabella resta con '?' finché non viene cliccato. Se si preferisce che sia già compilata, decommenta:
+  // document.getElementById('c3a').textContent = '0,50';
+  // ecc.
+});
+
+show(0);
+</script>
+</body>
+</html>
