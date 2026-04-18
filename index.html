@@ -256,6 +256,37 @@
   }
   .do-opinioni .tick { color: var(--rosso); }
 
+  .epigraph {
+    border-left: 10px solid var(--blu);
+    padding: 0.7em 1.2em;
+    margin-bottom: 1.2em;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    color: var(--blu-dark);
+    background: #f4f8fc;
+  }
+  .epigraph .quote-main {
+    font-size: clamp(1.9rem, 3.6vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .epigraph .quote-sub {
+    font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+    font-weight: 600;
+    margin-top: 0.4em;
+    line-height: 1.3;
+  }
+  .epigraph cite {
+    display: block;
+    font-style: normal;
+    font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+    color: var(--rosso);
+    margin-top: 0.7em;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
   @media (max-width: 900px) {
     .istat-card { grid-template-columns: 1fr; }
     .istat-logo {
@@ -286,6 +317,8 @@
     .do-dati .label, .do-dati .tick { color: #000 !important; }
     .do-opinioni .label { color: #000 !important; }
     .do-opinioni .tick { color: #000 !important; }
+    .epigraph { background: #fff !important; border-left-color: #000 !important; color: #000 !important; }
+    .epigraph cite { color: #000 !important; }
   }
 </style>
 </head>
@@ -293,8 +326,16 @@
 
 <div class="hint">Usa ← → o clic sui pulsanti per navigare</div>
 
-<!-- SLIDE 0 - Cos'è l'ISTAT -->
-<section class="slide active" id="s0">
+<!-- SLIDE 0 - Epigrafe apertura -->
+<section class="slide active" id="s-intro">
+  <div class="epigraph" style="border-left-width:12px; padding:1.2em 1.6em; margin:auto 0;">
+    <div class="quote-main" style="font-size:clamp(2.2rem, 4.2vw, 3.8rem);">«Lo spirito è qualcosa di vero che riguarda noi stessi.</div>
+    <div class="quote-sub" style="font-size:clamp(1.7rem, 3vw, 2.6rem);">La battuta è qualcosa che fa male a un altro.»</div>
+  </div>
+</section>
+
+<!-- SLIDE 1 - Cos'è l'ISTAT -->
+<section class="slide" id="s0">
   <h1>Cos'è l'ISTAT</h1>
   <h2>L'ente che produce i numeri ufficiali su chi siamo e come viviamo</h2>
   <div class="istat-card">
@@ -446,7 +487,7 @@
   <div class="source">Fonte: ISTAT 2023, Figura 6.</div>
 </section>
 
-<!-- SLIDE 9 (era 10) - Conclusione -->
+<!-- SLIDE 10 - Conclusione -->
 <section class="slide" id="s9">
   <h1>Cosa ci dicono questi numeri</h1>
   <ul class="keypoints" style="margin-top:0.6em;">
@@ -474,7 +515,7 @@
 
 <div class="nav">
   <button id="prev">◀</button>
-  <span class="counter" id="counter">1 / 10</span>
+  <span class="counter" id="counter">1 / 11</span>
   <button id="next">▶</button>
 </div>
 
@@ -553,13 +594,13 @@ function initChartFor(slideIdx) {
   if (initialized.has(slideIdx)) return;
   initialized.add(slideIdx);
   setTimeout(() => {
-    if (slideIdx === 2) makeChart2();
-    if (slideIdx === 3) makeChart3();
-    if (slideIdx === 4) makeChart4();
-    if (slideIdx === 5) makeChart5();
-    if (slideIdx === 6) makeChart6();
-    if (slideIdx === 7) makeChart7();
-    if (slideIdx === 8) makeChart8();
+    if (slideIdx === 3) makeChart2();
+    if (slideIdx === 4) makeChart3();
+    if (slideIdx === 5) makeChart4();
+    if (slideIdx === 6) makeChart5();
+    if (slideIdx === 7) makeChart6();
+    if (slideIdx === 8) makeChart7();
+    if (slideIdx === 9) makeChart8();
   }, 50);
 }
 
